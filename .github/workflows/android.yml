@@ -13,14 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # ۱. استخراج محتویات فایل زیپ (نام فایل دقیقا رعایت شده)
+      # ۱. استخراج صحیح فایل زیپ
       - name: Extract Project Zip
         run: |
-          unzip android-drawing-app-request-2.zip
-          # انتقال محتویات به شاخه اصلی اگر داخل پوشه باشند
+          unzip -o android-drawing-app-request-2.zip
+          # اگر فایل‌ها در پوشه استخراج شدند، آن‌ها را به ریشه منتقل کن
           if [ -d "android-drawing-app-request-2" ]; then
-            mv android-drawing-app-request-2/* .
-            mv android-drawing-app-request-2/.* . 2>/dev/null || true
+            cp -r android-drawing-app-request-2/. .
           fi
 
       # ۲. نصب محیط Node.js
@@ -29,34 +28,34 @@ jobs:
         with:
           node-version: 20
 
-      # ۳. نصب ملزومات و بیلد پروژه وب
+      # ۳. نصب ملزومات و بیلد وب (تولید پوشه dist)
       - name: Install and Build Web
         run: |
-          npm install --force
+          npm install
           npm run build
 
-      # ۴. تنظیم جاوا برای اندروید
+      # ۴. تنظیم محیط جاوا
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      # ۵. تبدیل به اندروید با Capacitor
-      - name: Capacitor Android Setup
+      # ۵. راه‌اندازی Capacitor برای اندروید
+      - name: Capacitor Setup
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
           npx cap add android || true
           npx cap sync android
 
-      # ۶. تولید فایل APK (اصلی)
+      # ۶. ساخت فایل APK
       - name: Build APK with Gradle
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      # ۷. خروجی نهایی برای دانلود شما
+      # ۷. خروجی نهایی
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
