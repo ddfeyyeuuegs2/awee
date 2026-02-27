@@ -40,7 +40,6 @@ jobs:
       - name: Capacitor Android Setup
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android
-          # اطمینان از وجود پوشه بیلد قبل از اضافه کردن اندروید
           mkdir -p dist
           npx cap add android || true
           npx cap sync android
@@ -49,12 +48,13 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
-          # استفاده از فلگ برای نادیده گرفتن خطاهای کوچک پلتفرم
-          ./gradlew assembleDebug --stacktrace
+          # حذف بیلدهای قبلی و تعمیر تنظیمات
+          ./gradlew clean
+          # بیلد نهایی با نادیده گرفتن هشدارهای سیستمی
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Drawing-App-v2
+          name: Painting-App-Final
           path: android/app/build/outputs/apk/debug/app-debug.apk
-
